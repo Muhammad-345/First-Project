@@ -2,7 +2,7 @@ console.log('Lets Write JavaScript');
 
 // Get songs from server directory
 async function getsongs() {
-    const a = await fetch("songs/");
+    const a = await fetch("Songs/");
     const respose = await a.text();
     const div = document.createElement("div");
     div.innerHTML = respose;
@@ -12,7 +12,7 @@ async function getsongs() {
     as.forEach(link => {
       if (!link.href) return;
       if (link.href.toLowerCase().endsWith('.mp3')) {
-        const parts = link.href.split('/songs/');
+        const parts = link.href.split('/Songs/');
         const filename = parts.length > 1 ? parts.pop() : null;
         if (filename && filename.trim() !== '') {
           songs.push(filename);
