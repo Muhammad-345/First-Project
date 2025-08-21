@@ -1,12 +1,14 @@
-// main.js (complete, merged, ready to paste)
-// Last updated: merged per your instructions
+// main.js (directory listening commented out, static JSON/array songs appended)
+// Last updated: directory listening commented + static songsData added
 console.log('Lets Write JavaScript');
 
-// ===============================
-// Directory listing (server) helper
-// ===============================
-// Note: many static hosts (Vercel/Netlify) do not expose directory listings.
-// The app here attempts to use getsongs() but you already use a static playlist fallback.
+/* =====================================================
+   DIRECTORY LISTING (COMMENTED OUT)
+   Many static hosts (Netlify/Vercel) won't allow directory
+   listing. Keep this commented for reference if you ever
+   run a local server that exposes the folder listing.
+===================================================== */
+/*
 async function getsongs() {
     try {
         const a = await fetch("Songs/");
@@ -33,25 +35,36 @@ async function getsongs() {
         return [];
     }
 }
+*/
 
-// ===============================
-// Static playlist fallback (use this if directory listing unavailable)
-// ===============================
+/* === STATIC SONGS (JSON/ARRAY) ===
+   Put your files here. Each object should include `file`.
+   Optional fields: title, artist, image (relative path).
+   - file: exact filename inside Songs/ (case-sensitive on many hosts!)
+   - metaKey (optional): key to use in songMeta; defaults to filename base
+*/
+const songsData = [
+    { file: "Alan Walker II.mp3", title: "Alan Walker II", artist: "Alan Walker, Ava Max", image: "Songs/Song Images/Alan%20Walker%20II.jpeg" },
+    { file: "Vincenzo OST.mp3", title: "Vincenzo OST", artist: "Choi Sung Hoon, John Park", image: "Songs/Song Images/Vincenzo%20OST.jpeg" },
+    { file: "Arabic Song.mp3", title: "Arabic Song", artist: "Balti, Ahmed Hamouda" },
+    { file: "Asma ul Husna.mp3", title: "Asma ul Husna", artist: "Saadya Batool, Zainab Imran" },
+    { file: "Humne Aankhon Se Dekha Nahi Hai Magar.mp3", title: "Humne Aankhon Se Dekha Nahi Hai Magar", artist: "Ahemad Razvi, Tatheer Fatima" },
+    { file: "Mustafa Mustafa.mp3", title: "Mustafa Mustafa", artist: "Mohammad Seddiq, Hussain Raza" },
+    { file: "Rahman ya Rahman.mp3", title: "Rahman ya Rahman", artist: "Ayisha Abdul Basith, Misary Alafasy" },
+    { file: "يا نبي سلام عليك.mp3", title: "يا نبي سلام عليك", artist: "Maher Zain" },
+    { file: "Arabic Remix.mp3", title: "Arabic Remix", artist: "Najwa Farouk" }
+];
+/* === END STATIC SONGS === */
+
 let playlist = [];
-// If you prefer a full static playlist (explicit filenames), you may populate `playlist` here
-// Example (you already have a dynamic getsongs-based fill in main()):
-// playlist = ["Alan Walker II.mp3", "Vincenzo OST.mp3", ...];
-
 const audioPlayer = new Audio();
 let currentSongIndex = -1;
 let shuffleMode = false;
 let repeatMode = false;
 
-/* === INSERT: song metadata map (edit/add songs & artists here) ===
-   - Keys MUST match the file base name (filename without .mp3) after decodeURIComponent
-   - Add new songs here to supply title/artist/image info.
-   - Image paths may be absolute or relative; if not provided, script will try
-     Songs/Song Images/<encoded baseName>.jpeg then .jpg then default.
+/* === INSERT: song metadata map (edit/add songs & artists here)
+   Keys MUST match the file base name (filename without .mp3)
+   If songsData includes title/artist/image those will be merged into songMeta automatically.
 */
 const songMeta = {
     "Alan Walker II": {
@@ -99,10 +112,6 @@ const songMeta = {
    Playback & UI functions
    ========================= */
 
-/**
- * Play a song by playlist index.
- * Updates footer songinfo & Now Playing panel (and un-mutes audio when a new track starts).
- */
 function playSongAtIndex(index) {
     if (!playlist || playlist.length === 0) return;
     if (index < 0 || index >= playlist.length) return;
@@ -110,13 +119,15 @@ function playSongAtIndex(index) {
     currentSongIndex = index;
     const filename = playlist[index];
 
-    // set source and play
+    // audio source path relative to project
     audioPlayer.src = `Songs/${filename}`;
     audioPlayer.play().catch(err => console.error('Playback error:', err));
 
-    // derive baseName & meta
+    // Decode file name
     const decoded = decodeURIComponent(filename);
     const baseName = decoded.replace(/\.[^/.]+$/, '');
+
+    // Metadata lookup
     const defaultImg = 'Songs/Song Images/default.jpeg';
     const meta = (songMeta && songMeta[baseName]) ? songMeta[baseName] : {
         title: baseName,
@@ -124,54 +135,42 @@ function playSongAtIndex(index) {
         image: defaultImg
     };
 
-    // ensure meta.image exists (fallback path)
-    meta.image = meta.image || `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
+    // fallback if no image in metadata
+    const imagePath = meta.image || `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
+    meta.image = imagePath;
 
-    // unmute and set volume to previous level (if desired)
-    audioPlayer.muted = false;
-
-    // Update UI: NowPlaying (right panel) + footer
+    // Update Now Playing and footer
     updateNowPlaying(meta);
 
-    // visually mark playing card
+    // mark playing card visually
     document.querySelectorAll('.song').forEach((el, i) => {
         el.classList.toggle('playing', i === index);
     });
 }
 
-/* === INSERT: updateNowPlaying(song) - updates right-side panel & footer songinfo ===
-   Receives a metadata object {title, artist, image}.
-*/
+/* updateNowPlaying - updates right panel and footer */
 function updateNowPlaying(song) {
     if (!song) return;
     const nowPlaying = document.querySelector(".NowPlaying");
     const rightSection = document.querySelector(".right");
 
-    // Show NowPlaying panel and shrink right section
     if (nowPlaying && rightSection) {
         nowPlaying.classList.add("active");
         rightSection.classList.add("shrink");
     }
 
-    // Title in h2.title
     const titleEl = document.querySelector(".NowPlaying .title");
     if (titleEl) titleEl.textContent = song.title || '';
 
-    // Title duplicate in div.songname
     const songnameEl = document.querySelector(".NowPlaying .songname");
     if (songnameEl) songnameEl.textContent = song.title || '';
 
-    // Artists list (credits)
     const artistsNamesEl = document.querySelector(".NowPlaying .artists-names");
     if (artistsNamesEl) {
-        // accept comma-separated string or array
         if (Array.isArray(song.artist)) {
             artistsNamesEl.innerHTML = song.artist.map(a => `<div>${a}</div>`).join('');
         } else {
-            // if artist contains commas we still show them (but user asked to show each artist separately earlier)
-            // keep as string; if you want each on own line, change to split(',')
             if (typeof song.artist === 'string' && song.artist.includes(',')) {
-                // split by comma and show each in its own div for better appearance
                 artistsNamesEl.innerHTML = song.artist.split(',').map(s => `<div>${s.trim()}</div>`).join('');
             } else {
                 artistsNamesEl.textContent = song.artist || '';
@@ -179,7 +178,6 @@ function updateNowPlaying(song) {
         }
     }
 
-    // Album/cover image - preload and fallback
     const nowImg = document.querySelector(".NowPlaying .image img");
     const defaultImg = 'Songs/Song Images/default.jpeg';
     if (nowImg) {
@@ -189,7 +187,6 @@ function updateNowPlaying(song) {
         pre.src = song.image || defaultImg;
     }
 
-    // Also ensure footer songinfo updated (keeps consistent)
     const footerInfo = document.querySelector("footer .songinfo");
     if (footerInfo) {
         footerInfo.innerHTML = `
@@ -201,17 +198,15 @@ function updateNowPlaying(song) {
         `;
     }
 
-    // Ensure playing icon in footer goes green
+    // make the playing icon green if present
     const playIcon = document.querySelector('.othercontrols .toggle-now-playing, .othercontrols img[src*="playing.svg"]');
     if (playIcon) playIcon.classList.add('active');
 }
-/* === END INSERT === */
 
 /* Build song cards from playlist */
 function buildSongCards(containerEl) {
     const defaultImg = 'Songs/Song Images/default.jpeg';
 
-    // Helper: set image src with fallback
     function setImageWithFallback(imgEl, baseName) {
         imgEl.src = `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
         imgEl.dataset.attempt = 'jpeg';
@@ -233,19 +228,16 @@ function buildSongCards(containerEl) {
         };
     }
 
-    // Container should be empty or will append to existing
     playlist.forEach((songFile, index) => {
         if (!songFile) return;
 
         const decoded = decodeURIComponent(songFile);
         const baseName = decoded.replace(/\.[^/.]+$/, '');
 
-        // Create card wrapper
         const songDiv = document.createElement('div');
         songDiv.classList.add('trending-songs', 'song', 'flex');
         songDiv.setAttribute('data-song', songFile);
 
-        // Image container
         const imgContainer = document.createElement('div');
         imgContainer.classList.add('song-image-container');
 
@@ -253,7 +245,6 @@ function buildSongCards(containerEl) {
         imgEl.classList.add('selfcenter');
         imgEl.alt = baseName;
 
-        // Play overlay
         const overlay = document.createElement('div');
         overlay.classList.add('play-button-overlay');
         overlay.innerHTML = `<img src="Recources/play.svg" class="play-icon" alt="Play Icon">`;
@@ -261,7 +252,6 @@ function buildSongCards(containerEl) {
         imgContainer.appendChild(imgEl);
         imgContainer.appendChild(overlay);
 
-        // Title and artist elements
         const titleEl = document.createElement('h2');
         titleEl.classList.add('songname', 'cwhite', 'F16px');
 
@@ -273,7 +263,6 @@ function buildSongCards(containerEl) {
         titleEl.textContent = (meta && meta.title) ? meta.title : baseName;
         artistEl.textContent = (meta && meta.artist) ? (Array.isArray(meta.artist) ? meta.artist.join(', ') : meta.artist) : 'Unknown Artist';
 
-        // Set image with metadata or fallback
         if (meta && meta.image) {
             imgEl.src = meta.image;
             imgEl.onerror = () => {
@@ -284,23 +273,19 @@ function buildSongCards(containerEl) {
             setImageWithFallback(imgEl, baseName);
         }
 
-        // Assemble card
         songDiv.appendChild(imgContainer);
         songDiv.appendChild(titleEl);
         songDiv.appendChild(artistEl);
 
         containerEl.appendChild(songDiv);
 
-        // Click handler: play this song
         songDiv.addEventListener('click', () => {
             playSongAtIndex(index);
         });
     });
 }
 
-/* === INSERT: Popular Artists - dynamic generation (clickable, with links) ===
-   Add/modify artists in `artistList`. Images expected at artist-images/<encoded name>.jpeg
-*/
+/* === Popular Artists builder (unchanged) === */
 function buildPopularArtists() {
     const artistList = [
         "Alan Walker",
@@ -312,7 +297,6 @@ function buildPopularArtists() {
         "Anuv Jain"
     ];
 
-    // known good links (prefer these)
     const artistLinks = {
         "Alan Walker": "https://en.wikipedia.org/wiki/Alan_Walker",
         "Arijit Singh": "https://en.wikipedia.org/wiki/Arijit_Singh",
@@ -329,7 +313,6 @@ function buildPopularArtists() {
         return;
     }
 
-    // Preserve scroll-controls block if present
     const scrollControls = container.querySelector('.scroll-controls');
     container.innerHTML = '';
     if (scrollControls) container.appendChild(scrollControls);
@@ -404,14 +387,12 @@ function buildPopularArtists() {
         about.appendChild(nameEl);
         about.appendChild(profEl);
 
-        // Put the card inside the anchor so the whole card is clickable
         anchor.appendChild(about);
         cardsWrapper.appendChild(anchor);
     });
 
     container.appendChild(cardsWrapper);
 
-    // local scroll buttons behavior (if present inside this container)
     const leftBtn = container.querySelector('.scroll-btn.left-scroll');
     const rightBtn = container.querySelector('.scroll-btn.right-scroll');
 
@@ -444,8 +425,8 @@ function buildPopularArtists() {
         setTimeout(updateArtistScrollButtons, 50);
     }
 }
-/* === END INSERT === */
 
+/* Update NowPlaying UI helper (keeps compatibility) */
 function updateNowPlayingUI(baseName) {
     const meta = (songMeta && songMeta[baseName]) ? songMeta[baseName] : null;
     const titleText = (meta && meta.title) ? meta.title : baseName;
@@ -468,7 +449,7 @@ function updateNowPlayingUI(baseName) {
     }
 }
 
-/* Update footer song info */
+/* Update footer song info (if used elsewhere) */
 function updateSongInfo(songName, artistName, imagePath) {
     const songInfoEl = document.querySelector('.songinfo');
     const defaultImg = 'Songs/Song Images/default.jpeg';
@@ -480,7 +461,6 @@ function updateSongInfo(songName, artistName, imagePath) {
     
     songInfoEl.innerHTML = '';
     
-    // Create image element
     const imageEl = document.createElement('div');
     imageEl.className = 'song-image';
     imageEl.style.cssText = `
@@ -493,18 +473,15 @@ function updateSongInfo(songName, artistName, imagePath) {
         flex-shrink: 0;
     `;
     
-    // Create text container
     const textContainer = document.createElement('div');
     textContainer.className = 'song-text-info';
     textContainer.style.cssText = 'margin-left: 10px; display: flex; flex-direction: column;';
     
-    // Create title element
     const titleEl = document.createElement('div');
     titleEl.className = 'song-title';
     titleEl.textContent = songName || '';
     titleEl.style.cssText = 'font-weight: bold; color: white; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;';
     
-    // Create artist element
     const artistEl = document.createElement('div');
     artistEl.className = 'song-artist';
     artistEl.textContent = artistName || '';
@@ -515,7 +492,6 @@ function updateSongInfo(songName, artistName, imagePath) {
     songInfoEl.appendChild(imageEl);
     songInfoEl.appendChild(textContainer);
     
-    // Set image with fallback
     let safePath;
     try {
         const url = new URL(imagePath, window.location.origin);
@@ -537,7 +513,7 @@ function updateSongInfo(songName, artistName, imagePath) {
     pre.src = safePath;
 }
 
-/* Setup footer controls */
+/* Setup footer controls (seekbar/volume/play controls) */
 function setupFooterControls() {
     const playPauseBtn = document.querySelector('.songcontrols img[src*="pause.svg"], .songcontrols img[src*="play.svg"]');
     const nextBtn = document.querySelector('.songcontrols img[src*="forward.svg"]');
@@ -551,7 +527,6 @@ function setupFooterControls() {
         return;
     }
 
-    // Create seek progress bar and time display
     let seekProgress = seekbar.querySelector('.seek-progress');
     let seekCircle = seekbar.querySelector('.seek-circle');
     let seekTime = seekbar.querySelector('.seek-time');
@@ -572,7 +547,6 @@ function setupFooterControls() {
         seekbar.appendChild(seekTime);
     }
 
-    // Helper: format seconds to MM:SS
     function formatTime(sec) {
         if (!isFinite(sec)) return '0:00';
         const s = Math.floor(sec % 60);
@@ -580,7 +554,6 @@ function setupFooterControls() {
         return `${m}:${s.toString().padStart(2, '0')}`;
     }
 
-    // Update play/pause icon
     function setPlayIcon(isPlaying) {
         if (!playPauseBtn) return;
         const playPath = 'Recources/play.svg';
@@ -588,7 +561,6 @@ function setupFooterControls() {
         playPauseBtn.src = isPlaying ? pausePath : playPath;
     }
 
-    // Play/Pause toggle
     if (playPauseBtn) {
         playPauseBtn.addEventListener('click', () => {
             if (!audioPlayer.src) {
@@ -606,7 +578,6 @@ function setupFooterControls() {
         });
     }
 
-    // Next button
     if (nextBtn) {
         nextBtn.addEventListener('click', () => {
             if (!playlist.length) return;
@@ -620,7 +591,6 @@ function setupFooterControls() {
         });
     }
 
-    // Previous button
     if (prevBtn) {
         prevBtn.addEventListener('click', () => {
             if (!playlist.length) return;
@@ -629,7 +599,6 @@ function setupFooterControls() {
         });
     }
 
-    // Shuffle toggle
     if (shuffleBtn) {
         shuffleBtn.style.opacity = shuffleMode ? 1 : 0.5;
         shuffleBtn.addEventListener('click', () => {
@@ -638,7 +607,6 @@ function setupFooterControls() {
         });
     }
 
-    // Repeat toggle
     if (repeatBtn) {
         repeatBtn.style.opacity = repeatMode ? 1 : 0.5;
         repeatBtn.addEventListener('click', () => {
@@ -648,7 +616,6 @@ function setupFooterControls() {
         });
     }
 
-    // Update seekbar as audio plays
     audioPlayer.addEventListener('timeupdate', () => {
         const d = audioPlayer.duration || 0;
         const c = audioPlayer.currentTime || 0;
@@ -660,17 +627,14 @@ function setupFooterControls() {
         seekTime.textContent = `${formatTime(c)} / ${formatTime(d)}`;
     });
 
-    // When metadata loaded
     audioPlayer.addEventListener('loadedmetadata', () => {
         const d = audioPlayer.duration || 0;
         seekTime.textContent = `0:00 / ${formatTime(d)}`;
     });
 
-    // Sync play/pause icon with audio state
     audioPlayer.addEventListener('play', () => setPlayIcon(true));
     audioPlayer.addEventListener('pause', () => setPlayIcon(false));
 
-    // Clicking on seekbar moves playback position
     seekbar.addEventListener('click', (e) => {
         const rect = seekbar.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -679,7 +643,6 @@ function setupFooterControls() {
         audioPlayer.currentTime = pct * audioPlayer.duration;
     });
 
-    // Make the circle draggable to seek
     let dragging = false;
     seekCircle.addEventListener('pointerdown', (e) => {
         dragging = true;
@@ -698,17 +661,16 @@ function setupFooterControls() {
         dragging = false;
     });
 
-    /* === INSERT: Volume control + mute/unmute toggle (uses #volumeToggle id) === */
+    /* Volume control */
     (function setupVolumeControl() {
         const volBar = document.querySelector('.othercontrols .volume-seekbar');
         const volProgress = volBar ? volBar.querySelector('.volume-progress') : null;
         const volThumb = volBar ? volBar.querySelector('.volume-thumb') : null;
-        const volumeIcon = document.getElementById("volumeToggle"); // expect id on <img>
+        const volumeIcon = document.getElementById("volumeToggle");
 
         let isMuted = false;
 
         if (!volBar || !volProgress || !volThumb || !volumeIcon) {
-            // If missing elements, skip volume wiring silently
             return;
         }
 
@@ -718,29 +680,24 @@ function setupFooterControls() {
             audioPlayer.muted = false;
             volProgress.style.width = (pct * 100) + '%';
             volThumb.style.left = (pct * 100) + '%';
-            // switch to volume icon
             volumeIcon.src = "Recources/volume.svg";
             isMuted = false;
         }
 
-        // initialize
         setVolume(typeof audioPlayer.volume === 'number' ? audioPlayer.volume : 0.5);
 
-        // Click icon to mute/unmute
         volumeIcon.addEventListener("click", () => {
             isMuted = !isMuted;
             audioPlayer.muted = isMuted;
             volumeIcon.src = isMuted ? "Recources/mute.svg" : "Recources/volume.svg";
         });
 
-        // Click to set volume
         volBar.addEventListener('click', (e) => {
             const rect = volBar.getBoundingClientRect();
             const x = e.clientX - rect.left;
             setVolume(x / rect.width);
         });
 
-        // Drag support
         let volDragging = false;
         volThumb.addEventListener('pointerdown', (ev) => {
             volDragging = true;
@@ -756,24 +713,19 @@ function setupFooterControls() {
             volDragging = false;
         });
     })();
-    /* === END INSERT === */
 
     setPlayIcon(!audioPlayer.paused);
 }
 
-/* === INSERT: unified scroll control setup for trending & popular (fixes arrows) ===
-   This creates scroll behavior and toggles 'enabled' class for local left/right buttons inside each container.
-*/
+/* Unified scroll control setup */
 function setupLocalScrollControls(containerSelector, scrollTargetSelector) {
     const container = document.querySelector(containerSelector);
     if (!container) return;
 
-    // find target to scroll (either a child wrapper or container's specific child)
     let scrollTarget = null;
     if (scrollTargetSelector) {
         scrollTarget = container.querySelector(scrollTargetSelector);
     }
-    // fallback: a common convention
     if (!scrollTarget) {
         scrollTarget = container.querySelector('.spotifySongs') ||
                        container.querySelector('.popular-artists-cards') ||
@@ -815,16 +767,28 @@ function setupLocalScrollControls(containerSelector, scrollTargetSelector) {
     window.addEventListener('resize', updateButtons);
     setTimeout(updateButtons, 50);
 }
-/* === END INSERT === */
 
-/* Main function to initialize the app */
+/* Main initialization */
 async function main() {
-    // Try directory listing; if empty, rely on pre-filled playlist (you can set playlist manually)
-    const songsFromDir = await getsongs();
-    if (songsFromDir && songsFromDir.length) {
-        playlist = songsFromDir.slice();
+    // Use static songsData (JSON) to populate playlist and merge metadata
+    if (Array.isArray(songsData) && songsData.length) {
+        playlist = songsData.map(s => s.file);
+
+        // Merge any metadata from songsData into songMeta
+        songsData.forEach(entry => {
+            if (!entry || !entry.file) return;
+            const baseName = decodeURIComponent(entry.file).replace(/\.[^/.]+$/, '');
+            if (!songMeta[baseName]) songMeta[baseName] = {};
+            if (entry.title) songMeta[baseName].title = entry.title;
+            if (entry.artist) songMeta[baseName].artist = entry.artist;
+            if (entry.image) songMeta[baseName].image = entry.image;
+        });
+    } else {
+        // If you ever re-enable directory listing uncomment getsongs() at top and use:
+        // const songsFromDir = await getsongs();
+        // playlist = songsFromDir.slice();
+        console.warn('songsData is empty - playlist remains empty unless you enable directory reading or populate songsData.');
     }
-    // if playlist still empty, user can manually prefill it in code above
 
     const container = document.getElementById('trendingSongsContainer') || document.querySelector('.spotifySongs');
     if (!container) {
@@ -832,28 +796,20 @@ async function main() {
         return;
     }
 
-    // Build UI
     buildSongCards(container);
     setupFooterControls();
 
-    /* === INSERT: build popular artists on load === */
+    // build popular artists
     buildPopularArtists();
-    /* === END INSERT === */
 
-    /* === INSERT: setup scroll controls for both sections === */
-    // trending area - container is .trending-songs-container, target is #trendingSongsContainer
+    // setup scroll controls for both sections
     setupLocalScrollControls('.trending-songs-container', '#trendingSongsContainer');
-    // popular artists - container is .popular-artists, target is .popular-artists-cards (created dynamically)
     setupLocalScrollControls('.popular-artists', '.popular-artists-cards');
-    /* === END INSERT === */
 }
 
 main();
 
-/* === INSERT: Now Playing toggle (footer playing icon) ===
-   - toggles .NowPlaying display and .right.shrink
-   - toggles 'active' class on the icon so CSS can color it green (you already have .playing-icon.active)
-*/
+/* Now Playing toggle (footer playing icon) */
 (function setupNowPlayingToggle() {
     const playIcon = document.querySelector('.othercontrols .toggle-now-playing, .othercontrols img[src*="playing.svg"]');
     const nowPanel = document.querySelector('.NowPlaying');
@@ -864,7 +820,7 @@ main();
     function showNowPlaying() {
         nowPanel.classList.add('active');
         rightSection.classList.add('shrink');
-        playIcon.classList.add('active'); // CSS rule .playing-icon.active gives green tint
+        playIcon.classList.add('active');
     }
     function hideNowPlaying() {
         nowPanel.classList.remove('active');
@@ -872,7 +828,6 @@ main();
         playIcon.classList.remove('active');
     }
 
-    // Correct toggle behavior: hide if visible, show if hidden
     playIcon.addEventListener('click', () => {
         if (nowPanel.classList.contains('active')) {
             hideNowPlaying();
@@ -880,38 +835,31 @@ main();
             showNowPlaying();
         }
     });
-
-    // When updateNowPlaying() runs we already set playIcon active; if you'd like to ensure icon sync:
-    // Optionally: listen for a custom event or mutation - omitted for brevity.
 })();
- /* === END INSERT === */
 
-/* Scroll buttons functionality for trending (legacy fallback)
-   - Kept for compatibility if your HTML uses the original IDs
-*/
+/* Legacy/backup scroll button hooking (keeps backward compatibility) */
 document.addEventListener('DOMContentLoaded', function() {
-    // If your HTML uses old single global IDs, this won't break because we check existence first
     const trendingContainer = document.getElementById('trendingSongsContainer');
     const leftScrollBtn = document.getElementById('leftScrollTrending');
     const rightScrollBtn = document.getElementById('rightScrollTrending');
-    
+
     if (trendingContainer && leftScrollBtn && rightScrollBtn) {
         const scrollAmount = 400;
-        
+
         leftScrollBtn.addEventListener('click', function() {
             trendingContainer.scrollBy({
                 left: -scrollAmount,
                 behavior: 'smooth'
             });
         });
-        
+
         rightScrollBtn.addEventListener('click', function() {
             trendingContainer.scrollBy({
                 left: scrollAmount,
                 behavior: 'smooth'
             });
         });
-        
+
         function updateScrollButtons() {
             const visible = Math.ceil(trendingContainer.clientWidth);
             const total = Math.floor(trendingContainer.scrollWidth);
@@ -928,7 +876,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isAtStart) leftScrollBtn.classList.remove('enabled'); else leftScrollBtn.classList.add('enabled');
             if (isAtEnd) rightScrollBtn.classList.remove('enabled'); else rightScrollBtn.classList.add('enabled');
         }
-        
+
         trendingContainer.addEventListener('scroll', updateScrollButtons);
         updateScrollButtons();
     }
@@ -937,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Keyboard navigation support */
 document.addEventListener('keydown', function(e) {
     const trendingContainer = document.getElementById('trendingSongsContainer');
-    
+
     if (trendingContainer && document.activeElement === trendingContainer) {
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
