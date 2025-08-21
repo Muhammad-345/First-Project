@@ -2,7 +2,7 @@ console.log('Lets Write JavaScript');
 
 // Get songs from server directory
 async function getsongs() {
-    const a = await fetch("http://127.0.0.1:3000/Second%20Project/songs/");
+    const a = await fetch("songs/");
     const respose = await a.text();
     const div = document.createElement("div");
     div.innerHTML = respose;
@@ -33,18 +33,18 @@ let repeatMode = false;
    - Keys MUST match the file base name (filename without .mp3) after decodeURIComponent
    - Add new songs here to supply title/artist/image info.
    - Image paths may be absolute or relative; if not provided, script will try
-     /Second Project/Songs/Song Images/<encoded baseName>.jpeg then .jpg then default.
+     Songs/Song Images/<encoded baseName>.jpeg then .jpg then default.
 */
 const songMeta = {
     "Alan Walker II": {
       title: "Alan Walker II",
       artist: "Alan Walker, Ava Max",
-      image: "/Second Project/Songs/Song Images/Alan%20Walker%20II.jpeg"
+      image: "Songs/Song Images/Alan%20Walker%20II.jpeg"
     },
     "Vincenzo OST": {
       title: "Vincenzo OST",
       artist: "Choi Sung Hoon, John Park",
-      image: "/Second Project/Songs/Song Images/Vincenzo%20OST.jpeg"
+      image: "Songs/Song Images/Vincenzo%20OST.jpeg"
     },
     "Arabic Song": {
       title: "Arabic Song",
@@ -93,7 +93,7 @@ function playSongAtIndex(index) {
     const filename = playlist[index];
     
     // audio source path relative to project
-    audioPlayer.src = `/Second Project/Songs/${filename}`;
+    audioPlayer.src = `Songs/${filename}`;
     audioPlayer.play().catch(err => console.error('Playback error:', err));
     
     // Decode file name
@@ -101,7 +101,7 @@ function playSongAtIndex(index) {
     const baseName = decoded.replace(/\.[^/.]+$/, '');
     
     // Metadata lookup
-    const defaultImg = '/Second Project/Songs/Song Images/default.jpeg';
+    const defaultImg = 'Songs/Song Images/default.jpeg';
     const meta = (songMeta && songMeta[baseName]) ? songMeta[baseName] : {
         title: baseName,
         artist: 'Unknown Artist',
@@ -109,7 +109,7 @@ function playSongAtIndex(index) {
     };
     
     // fallback if no image in metadata
-    const imagePath = meta.image || `/Second Project/Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
+    const imagePath = meta.image || `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
     meta.image = imagePath;
     
     // === Update Now Playing section + Footer ===
@@ -156,7 +156,7 @@ function updateNowPlaying(song) {
 
     // Album/cover image - preload and fallback
     const nowImg = document.querySelector(".NowPlaying .image img");
-    const defaultImg = '/Second Project/Songs/Song Images/default.jpeg';
+    const defaultImg = 'Songs/Song Images/default.jpeg';
     if (nowImg) {
         const pre = new Image();
         pre.onload = () => { nowImg.src = song.image || defaultImg; };
@@ -180,18 +180,18 @@ function updateNowPlaying(song) {
 
 /* Build song cards from playlist */
 function buildSongCards(containerEl) {
-    const defaultImg = '/Second Project/Songs/Song Images/default.jpeg';
+    const defaultImg = 'Songs/Song Images/default.jpeg';
 
     // Helper: set image src with fallback
     function setImageWithFallback(imgEl, baseName) {
-        imgEl.src = `/Second Project/Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
+        imgEl.src = `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
         imgEl.dataset.attempt = 'jpeg';
 
         imgEl.onerror = function () {
             if (imgEl.dataset.attempt === 'jpeg') {
                 imgEl.dataset.attempt = 'jpg';
                 imgEl.onerror = null;
-                imgEl.src = `/Second Project/Songs/Song Images/${encodeURIComponent(baseName)}.jpg`;
+                imgEl.src = `Songs/Song Images/${encodeURIComponent(baseName)}.jpg`;
 
                 imgEl.onerror = function () {
                     imgEl.onerror = null;
@@ -227,7 +227,7 @@ function buildSongCards(containerEl) {
         // Play overlay
         const overlay = document.createElement('div');
         overlay.classList.add('play-button-overlay');
-        overlay.innerHTML = `<img src="/Second Project/Recources/play.svg" class="play-icon" alt="Play Icon">`;
+        overlay.innerHTML = `<img src="Recources/play.svg" class="play-icon" alt="Play Icon">`;
 
         imgContainer.appendChild(imgEl);
         imgContainer.appendChild(overlay);
@@ -270,7 +270,7 @@ function buildSongCards(containerEl) {
 }
 
 /* === INSERT: Popular Artists - dynamic generation (clickable, with links) ===
-   Add/modify artists in `artistList`. Images expected at /Second Project/artist-images/<encoded name>.jpeg
+   Add/modify artists in `artistList`. Images expected at artist-images/<encoded name>.jpeg
 */
 function buildPopularArtists() {
     const artistList = [
@@ -314,7 +314,7 @@ function buildPopularArtists() {
     cardsWrapper.style.alignItems = 'flex-start';
     cardsWrapper.style.scrollBehavior = 'smooth';
 
-    const defaultImg = '/Second Project/artist-images/default.jpeg';
+    const defaultImg = 'artist-images/default.jpeg';
 
     function getArtistLink(name) {
         if (artistLinks[name]) return artistLinks[name];
@@ -323,7 +323,7 @@ function buildPopularArtists() {
 
     artistList.forEach((artistName) => {
         const encoded = encodeURIComponent(artistName);
-        const imgPath = `/Second Project/artist-images/${encoded}.jpeg`;
+        const imgPath = `artist-images/${encoded}.jpeg`;
 
         const anchor = document.createElement('a');
         anchor.href = getArtistLink(artistName);
@@ -421,8 +421,8 @@ function updateNowPlayingUI(baseName) {
     const meta = (songMeta && songMeta[baseName]) ? songMeta[baseName] : null;
     const titleText = (meta && meta.title) ? meta.title : baseName;
     const artists = (meta && meta.artist) ? meta.artist : 'Unknown Artist';
-    const imagePath = (meta && meta.image) ? meta.image : `/Second Project/Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
-    const defaultImg = '/Second Project/Songs/Song Images/default.jpeg';
+    const imagePath = (meta && meta.image) ? meta.image : `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
+    const defaultImg = 'Songs/Song Images/default.jpeg';
 
     const nowTitle = document.querySelector('.NowPlaying .title');
     if (nowTitle) nowTitle.textContent = titleText;
@@ -443,7 +443,7 @@ function updateNowPlayingUI(baseName) {
 /* Update footer song info */
 function updateSongInfo(songName, artistName, imagePath) {
     const songInfoEl = document.querySelector('.songinfo');
-    const defaultImg = '/Second Project/Songs/Song Images/default.jpeg';
+    const defaultImg = 'Songs/Song Images/default.jpeg';
     
     if (!songInfoEl) {
         console.warn('updateSongInfo: No .songinfo element found');
@@ -555,8 +555,8 @@ function setupFooterControls() {
     // Update play/pause icon
     function setPlayIcon(isPlaying) {
         if (!playPauseBtn) return;
-        const playPath = '/Second Project/Recources/play.svg';
-        const pausePath = '/Second Project/Recources/pause.svg';
+        const playPath = 'Recources/play.svg';
+        const pausePath = 'Recources/pause.svg';
         playPauseBtn.src = isPlaying ? pausePath : playPath;
     }
 
@@ -691,7 +691,7 @@ function setupFooterControls() {
             volProgress.style.width = (pct * 100) + '%';
             volThumb.style.left = (pct * 100) + '%';
             // switch to volume icon
-            volumeIcon.src = "/Second Project/Recources/volume.svg";
+            volumeIcon.src = "Recources/volume.svg";
             isMuted = false;
         }
 
@@ -702,7 +702,7 @@ function setupFooterControls() {
         volumeIcon.addEventListener("click", () => {
             isMuted = !isMuted;
             audioPlayer.muted = isMuted;
-            volumeIcon.src = isMuted ? "/Second Project/Recources/mute.svg" : "/Second Project/Recources/volume.svg";
+            volumeIcon.src = isMuted ? "Recources/mute.svg" : "Recources/volume.svg";
         });
 
         // Click to set volume
