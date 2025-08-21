@@ -1,29 +1,47 @@
+// main.js (complete, merged, ready to paste)
+// Last updated: merged per your instructions
 console.log('Lets Write JavaScript');
 
-// Get songs from server directory
+// ===============================
+// Directory listing (server) helper
+// ===============================
+// Note: many static hosts (Vercel/Netlify) do not expose directory listings.
+// The app here attempts to use getsongs() but you already use a static playlist fallback.
 async function getsongs() {
-    const a = await fetch("Songs/");
-    const respose = await a.text();
-    const div = document.createElement("div");
-    div.innerHTML = respose;
-    const as = Array.from(div.getElementsByTagName("a"));
-  
-    const songs = [];
-    as.forEach(link => {
-      if (!link.href) return;
-      if (link.href.toLowerCase().endsWith('.mp3')) {
-        const parts = link.href.split('/Songs/');
-        const filename = parts.length > 1 ? parts.pop() : null;
-        if (filename && filename.trim() !== '') {
-          songs.push(filename);
-        }
-      }
-    });
-  
-    return songs;
+    try {
+        const a = await fetch("Songs/");
+        const respose = await a.text();
+        const div = document.createElement("div");
+        div.innerHTML = respose;
+        const as = Array.from(div.getElementsByTagName("a"));
+
+        const songs = [];
+        as.forEach(link => {
+          if (!link.href) return;
+          if (link.href.toLowerCase().endsWith('.mp3')) {
+            const parts = link.href.split('/Songs/');
+            const filename = parts.length > 1 ? parts.pop() : null;
+            if (filename && filename.trim() !== '') {
+              songs.push(filename);
+            }
+          }
+        });
+
+        return songs;
+    } catch (err) {
+        console.warn('getsongs() failed (directory listing may not be available):', err);
+        return [];
+    }
 }
 
+// ===============================
+// Static playlist fallback (use this if directory listing unavailable)
+// ===============================
 let playlist = [];
+// If you prefer a full static playlist (explicit filenames), you may populate `playlist` here
+// Example (you already have a dynamic getsongs-based fill in main()):
+// playlist = ["Alan Walker II.mp3", "Vincenzo OST.mp3", ...];
+
 const audioPlayer = new Audio();
 let currentSongIndex = -1;
 let shuffleMode = false;
@@ -91,37 +109,37 @@ function playSongAtIndex(index) {
 
     currentSongIndex = index;
     const filename = playlist[index];
-    
-    // audio source path relative to project
+
+    // set source and play
     audioPlayer.src = `Songs/${filename}`;
     audioPlayer.play().catch(err => console.error('Playback error:', err));
-    
-    // Decode file name
+
+    // derive baseName & meta
     const decoded = decodeURIComponent(filename);
     const baseName = decoded.replace(/\.[^/.]+$/, '');
-    
-    // Metadata lookup
     const defaultImg = 'Songs/Song Images/default.jpeg';
     const meta = (songMeta && songMeta[baseName]) ? songMeta[baseName] : {
         title: baseName,
         artist: 'Unknown Artist',
         image: defaultImg
     };
-    
-    // fallback if no image in metadata
-    const imagePath = meta.image || `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
-    meta.image = imagePath;
-    
-    // === Update Now Playing section + Footer ===
+
+    // ensure meta.image exists (fallback path)
+    meta.image = meta.image || `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
+
+    // unmute and set volume to previous level (if desired)
+    audioPlayer.muted = false;
+
+    // Update UI: NowPlaying (right panel) + footer
     updateNowPlaying(meta);
 
-    // Mark the playing card visually
+    // visually mark playing card
     document.querySelectorAll('.song').forEach((el, i) => {
         el.classList.toggle('playing', i === index);
     });
 }
 
-/* === INSERT: updateNowPlaying(meta) - updates right-side panel & footer songinfo ===
+/* === INSERT: updateNowPlaying(song) - updates right-side panel & footer songinfo ===
    Receives a metadata object {title, artist, image}.
 */
 function updateNowPlaying(song) {
@@ -146,11 +164,18 @@ function updateNowPlaying(song) {
     // Artists list (credits)
     const artistsNamesEl = document.querySelector(".NowPlaying .artists-names");
     if (artistsNamesEl) {
-        // allow comma-separated string or array
+        // accept comma-separated string or array
         if (Array.isArray(song.artist)) {
             artistsNamesEl.innerHTML = song.artist.map(a => `<div>${a}</div>`).join('');
         } else {
-            artistsNamesEl.textContent = song.artist || '';
+            // if artist contains commas we still show them (but user asked to show each artist separately earlier)
+            // keep as string; if you want each on own line, change to split(',')
+            if (typeof song.artist === 'string' && song.artist.includes(',')) {
+                // split by comma and show each in its own div for better appearance
+                artistsNamesEl.innerHTML = song.artist.split(',').map(s => `<div>${s.trim()}</div>`).join('');
+            } else {
+                artistsNamesEl.textContent = song.artist || '';
+            }
         }
     }
 
@@ -175,6 +200,10 @@ function updateNowPlaying(song) {
             </div>
         `;
     }
+
+    // Ensure playing icon in footer goes green
+    const playIcon = document.querySelector('.othercontrols .toggle-now-playing, .othercontrols img[src*="playing.svg"]');
+    if (playIcon) playIcon.classList.add('active');
 }
 /* === END INSERT === */
 
@@ -242,7 +271,7 @@ function buildSongCards(containerEl) {
         const meta = (typeof songMeta !== 'undefined' && songMeta[baseName]) ? songMeta[baseName] : null;
 
         titleEl.textContent = (meta && meta.title) ? meta.title : baseName;
-        artistEl.textContent = (meta && meta.artist) ? meta.artist : 'Unknown Artist';
+        artistEl.textContent = (meta && meta.artist) ? (Array.isArray(meta.artist) ? meta.artist.join(', ') : meta.artist) : 'Unknown Artist';
 
         // Set image with metadata or fallback
         if (meta && meta.image) {
@@ -438,7 +467,6 @@ function updateNowPlayingUI(baseName) {
         pre.src = imagePath;
     }
 }
-
 
 /* Update footer song info */
 function updateSongInfo(songName, artistName, imagePath) {
@@ -791,8 +819,12 @@ function setupLocalScrollControls(containerSelector, scrollTargetSelector) {
 
 /* Main function to initialize the app */
 async function main() {
-    const songs = await getsongs();
-    playlist = songs.slice();
+    // Try directory listing; if empty, rely on pre-filled playlist (you can set playlist manually)
+    const songsFromDir = await getsongs();
+    if (songsFromDir && songsFromDir.length) {
+        playlist = songsFromDir.slice();
+    }
+    // if playlist still empty, user can manually prefill it in code above
 
     const container = document.getElementById('trendingSongsContainer') || document.querySelector('.spotifySongs');
     if (!container) {
@@ -840,16 +872,17 @@ main();
         playIcon.classList.remove('active');
     }
 
+    // Correct toggle behavior: hide if visible, show if hidden
     playIcon.addEventListener('click', () => {
         if (nowPanel.classList.contains('active')) {
-            showNowPlaying();
-        } else {
             hideNowPlaying();
+        } else {
+            showNowPlaying();
         }
     });
 
-    // If NowPlaying is opened by playing a song, ensure icon toggles too
-    // (we already add .active in updateNowPlaying)
+    // When updateNowPlaying() runs we already set playIcon active; if you'd like to ensure icon sync:
+    // Optionally: listen for a custom event or mutation - omitted for brevity.
 })();
  /* === END INSERT === */
 
