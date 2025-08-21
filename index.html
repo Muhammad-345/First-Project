@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="universal.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+    <title>Spotify - Web Player: Music for everyone</title>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="container flex bgblack cwhite p6-0 justifyContent">
+                <section class="leftSection flex">
+                    <div class="logo secpadding secmargin">
+                        <img src="/Second Project/Recources/logo.svg" alt="logo">
+                    </div>
+                    <div class="home secpadding secmargin">
+                        <img src="/Second Project/Recources/home.svg" alt="Home Icon">
+                    </div>
+                    <div class="search-bar">
+                        <img src="/Second Project/Recources/search.svg" alt="Search" class="search-icon">
+                        <input type="search" name="search" id="search" placeholder="What do you want to play?"
+                            title="Search">
+                        <span class="divider"></span>
+                        <img src="/Second Project/Recources/browse.svg" alt="Browse" class="browse-icon">
+                    </div>
+                </section>
+                <section class="rightSection flex">
+                    <div class="btn flex">
+                        <button type="button" class="btn1 hover fntlrg">Explore Premium</button>
+                        <button type="button" class="btn2 hover fntlrg"><img src="/Second Project/Recources/download.svg"
+                                alt="download button">
+                            Install app</button>
+                        <button type="button" class="button hover btnhid">
+                            <div class="icon-bg"><img src="/Second Project/Recources/bell.svg" alt="Bell Icon"></div>
+                        </button>
+                        <button type="button" class="button hover btnhid mright15">
+                            <div class="icon-bg"><img src="/Second Project/Recources/friendIcon.svg" alt="friendIcon">
+                            </div>
+                        </button>
+                        <button type="button" class="button hover btnhidlst mright15">
+                            <div class="icon-bg"><im
+                                src="/Second Project/Recources/accountIcon.svg" alt="accountIcon">
+                            </div>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="maincontainer flex bgblack p0-8">
+            <!-- <section class="left bg121212 MLR bradius"> -->
+                <!-- <div class="title flex justifyContent alignItems"> -->
+                    <!-- <div class="image"><img class="invert" src="/Second Project/Recources/playlist.svg" alt=""></div>
+                    <h3 class="cwhite">Your Library</h3>
+                    <div class="img">
+                        <img src="/Second Project/Recources/plusIcon.svg" alt="PlusIcon">
+                    </div>
+                </div> -->
+                <!-- <section class="playlist bg1f1f1f bradius">
+                    <h3 class="cwhite mleft fSizelarge">Create Your first playlist</h3>
+                    <div class="text mleft fSizesmall cf7f7f7">It's easy, we'll help you</div>
+                    <button type="button" class="mleft lftPbutton">Create playlist</button>
+                </section> -->
+                <!-- <section class="podcasts bg1f1f1f bradius">
+                    <h3 class="cwhite mleft fSizelarge">Let's find some podcasts to follow</h3>
+                    <div class="text mleft cf7f7f7 fSizesmall">We'll keep you updated on new episodes</div>
+                    <button type="button" class="mleft lftPbuttonpod">Browse podcasts</button>
+                </section> -->
+            <!-- </section> -->
+            <section class="right bg202020 MLR bradius">
+                <section class="midmainsection">
+                    <div class="startsection flex justifyContent">
+                        <h1 class="cwhite ">Trending Songs</h1>
+                        <button class="bnone bg1f1f1f cb3b3b3" type="button">Show All</button>
+                    </div>
+                </section>
+                <section class="trending-songs-container">
+                    <div class="scroll-controls">
+                        <button type="button" class="scroll-btn left-scroll" id="leftScrollTrendingSongs">
+                            <img src="/Second Project/Recources/leftarrow.svg" alt="Scroll Left" class="arrow-icon">
+                        </button>
+                        <button type="button" class="scroll-btn right-scroll" id="rightScrollTrendingSongs">
+                            <img src="/Second Project/Recources/rightarrow.svg" alt="Scroll Right" class="arrow-icon">
+                        </button>
+                    </div>
+
+                    <!-- Songs list container -->
+                    <section class="trending-songs spotifySongs flex justifyCenter alignItems"
+                        id="trendingSongsContainer">
+                    </section>
+                </section>
+                <h1 class="cwhite second-block">Popular Artists</h1>
+                <section class="popular-artists flex alignItems">
+                    <div class="scroll-controls">
+                        <button type="button" class="scroll-btn left-scroll" id="leftScrollPopularArtists">
+                            <img src="/Second Project/Recources/leftarrow.svg" alt="Scroll Left" class="arrow-icon">
+                        </button>
+                        <button type="button" class="scroll-btn right-scroll" id="rightScrollPopularArtists">
+                            <img src="/Second Project/Recources/rightarrow.svg" alt="Scroll Right" class="arrow-icon">
+                        </button>
+                    </div>
+                    <!-- <div class="about-artist">
+                        <div class="artist-image">
+                            <img class="bradius50" width="150px" src="/Second Project/artist-images/Pritam.jpeg" alt="">
+                        </div>
+                        <div class="artist-name cwhite">Pritam</div>
+                        <div class="profession  cb3b3b3 fSizelarge">Artist</div>
+                    </div> -->
+                </section>
+            </section>
+            <section class="NowPlaying bg202020 MLR bradius">
+                <div class="songinfo flex alignItems">
+                    <h2 class="title cwhite"></h2>
+                    <div class="image MLR bradius">
+                        <img src="" alt="Song Cover">
+                    </div>
+                    <div class="details">
+                        <div class="songname"></div>
+                        <div class="credits MLR bradius flex justifyCenter">
+                            Credits: <div class="artists-names"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+    </main>
+    <footer>
+        <!-- Play section moved outside -->
+        <section class="playsection flex justifyCenter alignItems">
+            <div class="seekbar">
+                <div class="circle"></div>
+            </div>
+            <div class="songinfo">
+                <!-- Content will be dynamically created by JavaScript -->
+            </div>
+            <div class="songcontrols flex">
+                <img src="/Second Project/Recources/shuffle.svg" alt="Shuffle">
+                <img src="/Second Project/Recources/rewind.svg" alt="Previous">
+                <img src="/Second Project/Recources/play.svg" alt="Play">
+                <img src="/Second Project/Recources/forward.svg" alt="Next">
+                <img src="/Second Project/Recources/repeat.svg" alt="Repeat">
+            </div>
+            <div class="othercontrols">
+                <img src="/Second Project/Recources/playing.svg" alt="Playing" class="toggle-now-playing playing-icon">
+                <button><img src="/Second Project/Recources/lyrics.svg" alt=""></button>
+                <img src="/Second Project/Recources/queue.svg" alt="">
+                <img src="/Second Project/Recources/device.svg" alt="">
+                <img src="/Second Project/Recources/volume.svg" alt="Volume" class="volume-icon" id="volumeToggle">           
+                <div class="volume-seekbar">
+                    <div class="volume-progress"></div>
+                    <div class="volume-thumb"></div>
+                </div>
+                <img src="/Second Project/Recources/miniplayer.svg" alt="">
+                <img src="/Second Project/Recources/fullscreen.svg" alt="">
+            </div>
+
+    </footer>
+    <script src="script.js"></script>
+    <!-- <script src="script2.js"></script> -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const nowPlaying = document.querySelector(".NowPlaying");
+            const rightSection = document.querySelector(".right");
+            const toggleBtn = document.querySelector(".playing-icon"); // your svg icon
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener("click", () => {
+                    if (nowPlaying.classList.contains("active")) {
+                        nowPlaying.classList.remove("active");
+                        rightSection.classList.remove("shrink");
+                        toggleBtn.classList.remove("active"); // remove green color
+                    } else {
+                        nowPlaying.classList.add("active");
+                        rightSection.classList.add("shrink");
+                        toggleBtn.classList.add("active"); // make it green
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

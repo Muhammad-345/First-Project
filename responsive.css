@@ -1,0 +1,432 @@
+@media only screen and (max-width: 320px) {
+
+    /* Hide all unnecessary elements */
+    .home,
+    .browse-icon,
+    .divider,
+    .btn1,
+    .btn2,
+    .btnhid,
+    /* bell + friend icons */
+    .btnhidlst {
+        display: none !important;
+    }
+
+    /* Keep only logo, search, and account visible */
+    .logo,
+    .search-bar {
+        display: flex !important;
+        align-items: center;
+    }
+
+    /* Make search bar only 50px wide */
+    .search-bar {
+        width: 50px !important;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Hide the input field */
+    .search-bar input {
+        display: none;
+    }
+
+    /* Just keep the search icon centered */
+    .search-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Account stays on far right */
+    .container .leftSection {
+        width: 100%;
+        justify-content: space-between;
+        padding: 6px;
+    }
+
+    /* main .left {
+        display: none;
+    } */
+
+    main .right {
+        width: 100% !important;
+    }
+
+    main .right .midmainsection .startsection h1 {
+        font-size: 16px;
+    }
+
+    main .right .midmainsection .startsection button {
+        font-size: 16px;
+        margin-top: 12px;
+    }
+
+    section.popular-artists {
+        display: none;
+    }
+
+    main .right .second-block {
+        display: none;
+    }
+
+    section.NowPlaying {
+        display: none !important;
+    }
+
+    .trending-songs {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #trendingSongsContainer {
+        justify-content: center;
+        align-items: center;
+    }
+
+    footer .playsection .othercontrols {
+        display: none !important;
+    }
+
+    footer .playsection .songinfo img {
+        display: none;
+    }
+
+    footer .playsection .songinfo {
+        bottom: 10px;
+        position: absolute;
+        margin: 0;
+    }
+
+    footer .playsection .songinfo .footer-details {
+        bottom: 50px;
+        position: absolute;
+        margin: 0;
+        left: 0;
+    }
+
+    footer .playsection .songinfo .footer-artist {
+        display: none;
+    }
+
+    footer .playsection .seekbar .seek-time {
+        right: -59px;
+        top: -5px;
+    }
+}
+
+@media only screen and (min-width: 321px) and (max-width: 375px) {
+
+    /* Hide all unnecessary elements */
+    .home,
+    .browse-icon,
+    .divider,
+    .btn1,
+    .btn2,
+    .btnhid,
+    /* bell + friend icons */
+    .btnhidlst {
+        display: none !important;
+    }
+
+    /* Keep only logo, search, and account visible */
+    .logo,
+    .search-bar {
+        display: flex !important;
+        align-items: center;
+    }
+
+    /* Make search bar only 50px wide */
+    .search-bar {
+        width: 50px !important;
+        /* justify-content: center; */
+        align-items: center;
+    }
+
+    /* Hide the input field */
+    .search-bar input {
+        display: none;
+    }
+
+    /* Just keep the search icon centered */
+    .search-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Account stays on far right */
+    header nav .container .leftSection {
+        width: 100%;
+        justify-content: space-between;
+        padding: 6px;
+    }
+
+    /* main .left {
+        display: none;
+    } */
+
+    main .right {
+        width: 100% !important;
+    }
+
+    main .right .midmainsection .startsection h1 {
+        font-size: 16px;
+    }
+
+    main .right .midmainsection .startsection button {
+        font-size: 16px;
+        margin-top: 12px;
+    }
+
+    section.popular-artists {
+        display: none;
+    }
+
+    main .right .second-block {
+        display: none;
+    }
+
+    section.NowPlaying {
+        display: none !important;
+    }
+
+    .trending-songs {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #trendingSongsContainer {
+        justify-content: center;
+        align-items: center;
+    }
+
+    footer .playsection .othercontrols {
+        display: none !important;
+    }
+
+    footer .playsection .songinfo img {
+        display: none;
+    }
+
+    footer .playsection .songinfo {
+        bottom: 10px;
+        position: absolute;
+        margin: 0;
+    }
+
+    footer .playsection .songinfo .footer-details {
+        bottom: 50px;
+        position: absolute;
+        margin: 0;
+        left: 0;
+    }
+
+    footer .playsection .songinfo .footer-artist {
+        display: none;
+    }
+
+    footer .playsection .seekbar .seek-time {
+        right: -59px;
+        top: -5px;
+    }
+}
+
+@media only screen and (min-width: 376px) and (max-width: 425px) {
+
+    /* Hide all unnecessary elements */
+    .home,
+    .browse-icon,
+    .divider,
+    .btn1,
+    .btn2,
+    .btnhid,
+    /* bell + friend icons */
+    .btnhidlst {
+        display: none !important;
+    }
+
+    /* Keep only logo, search, and account visible */
+    .logo,
+    .search-bar {
+        display: flex !important;
+        align-items: center;
+    }
+
+    /* Make search bar only 50px wide */
+    .search-bar {
+        width: 50px !important;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Hide the input field */
+    .search-bar input {
+        display: none;
+    }
+
+    /* Just keep the search icon centered */
+    .search-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Account stays on far right */
+    .container .leftSection {
+        width: 100%;
+        justify-content: space-between;
+        padding: 6px;
+    }
+
+    /* main .left {
+        display: none;
+    } */
+
+    main .right {
+        width: 100% !important;
+    }
+
+    main .right .midmainsection .startsection h1 {
+        font-size: 16px;
+    }
+
+    main .right .midmainsection .startsection button {
+        font-size: 16px;
+        margin-top: 12px;
+    }
+
+    section.popular-artists {
+        display: none;
+    }
+
+    main .right .second-block {
+        display: none;
+    }
+
+    section.NowPlaying {
+        display: none !important;
+    }
+
+    .trending-songs {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #trendingSongsContainer {
+        justify-content: center;
+        align-items: center;
+    }
+
+    footer .playsection .othercontrols {
+        display: none !important;
+    }
+
+    footer .playsection .songinfo img {
+        display: none;
+    }
+
+    footer .playsection .songinfo {
+        bottom: 10px;
+        position: absolute;
+        margin: 0;
+    }
+
+    footer .playsection .songinfo .footer-details {
+        bottom: 50px;
+        position: absolute;
+        margin: 0;
+        left: 0;
+    }
+
+    footer .playsection .songinfo .footer-artist {
+        display: none;
+    }
+
+    footer .playsection .seekbar .seek-time {
+        right: -59px;
+        top: -5px;
+    }
+}
+
+@media only screen and (min-width: 426px) and (max-width: 768px){
+    header nav .container .leftSection{
+        justify-content: space-evenly;
+        display: flex;
+        width: 100%;
+    }
+
+    header nav .container .rightSection{
+        display: none;
+    }
+
+    .right.shrink {
+        width: 65vw;
+    }
+
+    .NowPlaying {
+        width: 35vw;
+        height: 79vh;
+        display: none;
+        justify-content: center;
+        position: relative;
+    }
+
+    footer .playsection .othercontrols{
+        display: none;
+    }
+
+    footer .playsection .songinfo{
+        left: 15px;
+    }
+
+    footer .playsection .seekbar .seek-time {
+        right: -69px;
+        top: -5px;
+    }
+}
+
+@media only screen and (min-width: 769px) and (max-width: 1024px){
+    header nav .container .leftSection{
+        justify-content: space-evenly;
+        display: flex;
+        width: 100%;
+    }
+
+    header nav .container .rightSection{
+        display: none;
+    }
+
+    .right.shrink {
+        width: 65vw;
+    }
+
+    .NowPlaying {
+        width: 35vw;
+        height: 79vh;
+        display: none;
+        justify-content: center;
+        position: relative;
+    }
+
+    footer .playsection .songinfo{
+        left: 5px;
+        top: -16px;
+    }
+
+    footer .playsection .seekbar{
+        left: 150px;
+    }
+
+    footer .playsection .songcontrols{
+        left: 315px;
+    }
+
+    footer .playsection .seekbar .seek-time {
+        right: -69px;
+        top: -5px;
+    }
+}

@@ -1,0 +1,170 @@
+.test{
+    background-color: aqua;
+    border: 2px solid red;
+}
+
+.flex{
+    display: flex;
+}
+
+.flex-wrap{
+    flex-wrap: wrap;
+}
+
+.justifyContent{
+    justify-content: space-between;
+}
+
+.justifyCenter{
+    justify-content: center;
+}
+
+.alignItems{
+    align-items: center;
+}
+
+.selfcenter{
+    align-self: center;
+}
+
+.p6-0{ 
+    padding: 6px 0;
+}
+
+.mleft{
+    margin-left: 12px;
+}
+
+.bgblack{
+    background-color: black;
+}
+
+.cwhite{
+    color: white;
+}
+
+.alignItems{
+    align-items: center;
+}
+
+.secpadding{   
+     padding: 9px 10px 8px 12px;
+}
+
+.secmargin{
+    margin: 3px 3px 3px 11px;
+}
+
+.mright15{
+    margin-right: 15px;
+}
+
+.bg121212{
+    background-color: #121212;
+}
+
+.bg1f1f1f{
+    background-color: #1f1f1f;
+}
+
+.bg202020{
+    background-color: #202020;
+}
+
+/* .MLR{
+    margin: 0 8px;
+} */
+
+.p0-8{
+    padding: 0 8px;
+}
+
+.bradius{
+    border-radius: 13px;
+}
+
+.fSizelarge{
+    font-size: large;
+}
+
+.fSizesmall{
+    font-size: small;
+}
+
+.cf7f7f7{
+    color: #f7f7f7;
+}
+
+.lftPbutton{
+    background-color: white;
+    color: black;
+    width: 125px;
+    height: 32px;
+    font-weight: 800;
+    border-radius: 25px;
+    border: none;
+}
+
+.lftPbuttonpod{
+    background-color: white;
+    color: black;
+    width: 144px;
+    height: 32px;
+    font-weight: 800;
+    border-radius: 25px;
+    border: none;
+}
+
+.lftstyling{
+    margin: 23px 8px;
+    line-height: 3.5;
+}
+
+.mbutton{
+    background-color: #373737;
+
+}
+
+.p8-18{
+    padding: 8px 18px;
+}
+
+.bradius40{
+    border-radius: 40% ;
+}
+
+.bradius50{
+    border-radius: 50%;
+}
+
+.bnone{
+    border: none;
+}
+
+.cb3b3b3{
+    color: #b3b3b3;
+}
+
+.fntlrg{
+    font-weight: 800;
+}
+
+.F11px{
+    font-size: 11px;
+}
+
+.F16px{
+    font-size: 16px;
+}
+
+.txt-deco-none{
+    text-decoration: none;
+}
+
+.ft-invert{
+  filter: invert(1);
+}
+
+.txt-deco-under{
+    text-decoration: underline;
+}
