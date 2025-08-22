@@ -118,64 +118,38 @@ function playSongAtIndex(index) {
 
     currentSongIndex = index;
     const filename = playlist[index];
+    const loader = document.getElementById("loadingSpinner");
 
     // ---------------- SHOW LOADER ----------------
-    const loader = document.getElementById("loadingSpinner");
     loader.style.display = "block";
 
     // Reset player state
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
     audioPlayer.src = `Songs/${filename}`;
-    audioPlayer.preload = "metadata";
-    try { audioPlayer.load(); } catch (e) {}
+    audioPlayer.preload = "auto";  // preload fully
 
-    let didStart = false;
-
-    function startedPlayback() {
-        didStart = true;
-        cleanup();
-        // ---------------- HIDE LOADER ----------------
-        loader.style.display = "none";
-    }
-
-    function onCanPlay() {
-        if (!didStart) {
-            audioPlayer.play().then(startedPlayback).catch(err => {
-                console.warn('play() rejected on canplay:', err);
+    // Try to play when ready
+    const startPlayback = () => {
+        audioPlayer.play()
+            .then(() => {
+                loader.style.display = "none"; // ---------------- HIDE LOADER ----------------
+            })
+            .catch(err => {
+                console.error("Playback error:", err);
+                loader.style.display = "none"; // Hide loader even if error
             });
+    };
+
+    // Listen for when the audio is ready enough
+    audioPlayer.addEventListener("canplaythrough", startPlayback, { once: true });
+
+    // Fallback in case canplaythrough never fires (slow network, etc.)
+    setTimeout(() => {
+        if (loader.style.display === "block") {
+            startPlayback();
         }
-    }
-
-    function onCanPlayThrough() {
-        if (!didStart) {
-            audioPlayer.play().then(startedPlayback).catch(err => {
-                console.warn('play() rejected on canplaythrough:', err);
-            });
-        }
-    }
-
-    const FALLBACK_MS = 2500;
-    let fallbackTimeout = setTimeout(() => {
-        if (!didStart) {
-            audioPlayer.play().then(startedPlayback).catch(err => {
-                console.warn('play() rejected by fallback timeout:', err);
-            });
-        }
-    }, FALLBACK_MS);
-
-    function cleanup() {
-        audioPlayer.removeEventListener('canplay', onCanPlay);
-        audioPlayer.removeEventListener('canplaythrough', onCanPlayThrough);
-        clearTimeout(fallbackTimeout);
-    }
-
-    audioPlayer.addEventListener('canplay', onCanPlay);
-    audioPlayer.addEventListener('canplaythrough', onCanPlayThrough);
-
-    audioPlayer.play().then(startedPlayback).catch(err => {
-        console.warn('Immediate play() rejected (retrying later):', err);
-    });
+    }, 3000);
 
     // ---------------- METADATA + UI ----------------
     const decoded = decodeURIComponent(filename);
@@ -193,6 +167,7 @@ function playSongAtIndex(index) {
 
     updateNowPlaying(meta);
 
+    // Highlight active song in playlist
     document.querySelectorAll('.song').forEach((el, i) => {
         el.classList.toggle('playing', i === index);
     });
