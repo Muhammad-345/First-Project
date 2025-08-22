@@ -131,8 +131,8 @@
                 </div>
             </section>
 
-<!-- Loader Spinner -->
-<div id="loadingSpinner" class="spinner" style="display:none;"></div>
+<!-- Loader Spinner --><div id="loadingSpinner" class="spinner" style="display:none; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:9999;"></div>
+
 
     </main>
     <footer>
@@ -147,7 +147,7 @@
             <div class="songcontrols flex">
                 <img src="Recources/shuffle.svg" alt="Shuffle">
                 <img src="Recources/rewind.svg" alt="Previous">
-                <img src="Recources/play.svg" alt="Play">
+                <img id="playPauseBtn" src="Recources/play.svg" alt="Play">
                 <img src="Recources/forward.svg" alt="Next">
                 <img src="Recources/repeat.svg" alt="Repeat">
             </div>
