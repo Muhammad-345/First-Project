@@ -119,53 +119,42 @@ function playSongAtIndex(index) {
     currentSongIndex = index;
     const filename = playlist[index];
 
-    /* ----------------- OLD (commented) -----------------
-    // This approach (if you used preload="none" + waiting) can cause the browser
-    // or server to delay playback until enough is downloaded:
-    // audioPlayer.src = `Songs/${filename}`;
-    // audioPlayer.play().catch(err => console.error('Playback error:', err));
-    --------------------------------------------------- */
+    // ---------------- SHOW LOADER ----------------
+    const loader = document.getElementById("loadingSpinner");
+    loader.style.display = "block";
 
-    // ---------------- NEW: aggressive/robust start ----------------
     // Reset player state
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
-
-    // Set source and let browser fetch metadata (not "none")
     audioPlayer.src = `Songs/${filename}`;
-    // metadata tells browser to fetch headers and minimal initial data for quick start
     audioPlayer.preload = "metadata";
-    // call load() to ensure the element updates internal state
-    try { audioPlayer.load(); } catch (e) { /* ignore if not needed */ }
+    try { audioPlayer.load(); } catch (e) {}
 
-    // We try to play immediately. If browser blocks or buffering is needed,
-    // fallback handlers will attempt again as soon as playback is possible.
     let didStart = false;
+
     function startedPlayback() {
         didStart = true;
         cleanup();
+        // ---------------- HIDE LOADER ----------------
+        loader.style.display = "none";
     }
 
-    // Named handlers so we can remove them cleanly
     function onCanPlay() {
-        // canplay = there is enough data to start playback
         if (!didStart) {
-            audioPlayer.play().then(startedPlayback).catch((err) => {
-                // Not fatal: try again later via other handlers/timeouts
+            audioPlayer.play().then(startedPlayback).catch(err => {
                 console.warn('play() rejected on canplay:', err);
             });
         }
     }
+
     function onCanPlayThrough() {
-        // canplaythrough = likely enough data to play through without buffering
         if (!didStart) {
-            audioPlayer.play().then(startedPlayback).catch((err) => {
+            audioPlayer.play().then(startedPlayback).catch(err => {
                 console.warn('play() rejected on canplaythrough:', err);
             });
         }
     }
 
-    // Add fallback timeout: if nothing started in X ms, try calling play() again.
     const FALLBACK_MS = 2500;
     let fallbackTimeout = setTimeout(() => {
         if (!didStart) {
@@ -175,25 +164,20 @@ function playSongAtIndex(index) {
         }
     }, FALLBACK_MS);
 
-    // Cleanup helper
     function cleanup() {
         audioPlayer.removeEventListener('canplay', onCanPlay);
         audioPlayer.removeEventListener('canplaythrough', onCanPlayThrough);
         clearTimeout(fallbackTimeout);
     }
 
-    // Attach handlers (once semantics handled by cleanup)
     audioPlayer.addEventListener('canplay', onCanPlay);
     audioPlayer.addEventListener('canplaythrough', onCanPlayThrough);
 
-    // Immediately attempt to play (best effort). Browser may reject due to autoplay policy;
-    // if so the promise rejection is caught and fallbacks will retry when ready.
     audioPlayer.play().then(startedPlayback).catch(err => {
-        // Not fatal — we'll rely on canplay / canplaythrough / fallback timeout
-        console.warn('Immediate play() call rejected (will retry via handlers):', err);
+        console.warn('Immediate play() rejected (retrying later):', err);
     });
 
-    // ---------------- METADATA + UI (unchanged) ----------------
+    // ---------------- METADATA + UI ----------------
     const decoded = decodeURIComponent(filename);
     const baseName = decoded.replace(/\.[^/.]+$/, '');
 
@@ -207,10 +191,8 @@ function playSongAtIndex(index) {
     const imagePath = meta.image || `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
     meta.image = imagePath;
 
-    // update UI immediately (so user sees NowPlaying even if audio is still buffering)
     updateNowPlaying(meta);
 
-    // mark playing card visually
     document.querySelectorAll('.song').forEach((el, i) => {
         el.classList.toggle('playing', i === index);
     });
