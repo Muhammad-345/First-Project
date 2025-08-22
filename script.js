@@ -119,9 +119,25 @@ function playSongAtIndex(index) {
     currentSongIndex = index;
     const filename = playlist[index];
 
-    // audio source path relative to project
+    /*
+    ---------------- OLD CODE (loads whole file before playing) ----------------
     audioPlayer.src = `Songs/${filename}`;
     audioPlayer.play().catch(err => console.error('Playback error:', err));
+    ----------------------------------------------------------------------------
+    */
+
+    // ---------------- NEW STREAMING CODE ----------------
+    // Reset player before loading
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+    audioPlayer.src = `Songs/${filename}`;
+    audioPlayer.preload = "none";
+
+    // wait until it’s ready to start streaming
+    audioPlayer.addEventListener("canplay", function handleCanPlay() {
+        audioPlayer.removeEventListener("canplay", handleCanPlay);
+        audioPlayer.play().catch(err => console.error("Playback error:", err));
+    });
 
     // Decode file name
     const decoded = decodeURIComponent(filename);
@@ -147,6 +163,7 @@ function playSongAtIndex(index) {
         el.classList.toggle('playing', i === index);
     });
 }
+
 
 /* updateNowPlaying - updates right panel and footer */
 function updateNowPlaying(song) {
