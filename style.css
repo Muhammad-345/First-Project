@@ -979,31 +979,19 @@ footer .footer-artist {
     /* IE/Edge */
     scrollbar-width: none;
 
+/* simple white spinner for dark background */
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #3498db;  /* blue top */
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
+  border: 5px solid rgba(255,255,255,0.12);
+  border-top-color: #fff;
   animation: spin 1s linear infinite;
-
-  /* center it */
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 9999;
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to   { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-
-    /* Firefox */
-}
-
+    
 .volume-icon {
     cursor: pointer;
 }
