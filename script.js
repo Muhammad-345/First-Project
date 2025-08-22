@@ -1,5 +1,13 @@
-// main.js (directory listening commented out, static JSON/array songs appended)
-// Last updated: directory listening commented + static songsData added
+// main.js (complete, updated)
+// - Adds robust streaming start (tries immediate play, falls back to canplay/canplaythrough/timeouts)
+// - Global loader and play/pause icon helpers
+// - Uses static songsData (suitable for Netlify/Vercel)
+// - Keeps your existing UI-building code, but updates play/pause wiring to be more reliable
+// IMPORTANT: Ensure your HTML contains:
+//   <div id="loadingSpinner" class="spinner" style="display:none;"></div>
+//   <img id="playPauseBtn" src="Recources/play.svg" alt="Play/Pause">   <-- play/pause button in footer
+// If you don't want to add the id, the script will attempt a fallback selector but the id is recommended.
+
 console.log('Lets Write JavaScript');
 
 /* =====================================================
@@ -41,7 +49,6 @@ async function getsongs() {
    Put your files here. Each object should include `file`.
    Optional fields: title, artist, image (relative path).
    - file: exact filename inside Songs/ (case-sensitive on many hosts!)
-   - metaKey (optional): key to use in songMeta; defaults to filename base
 */
 const songsData = [
     { file: "Alan Walker II.mp3", title: "Alan Walker II", artist: "Alan Walker, Ava Max", image: "Songs/Song Images/Alan%20Walker%20II.jpeg" },
@@ -62,10 +69,7 @@ let currentSongIndex = -1;
 let shuffleMode = false;
 let repeatMode = false;
 
-/* === INSERT: song metadata map (edit/add songs & artists here)
-   Keys MUST match the file base name (filename without .mp3)
-   If songsData includes title/artist/image those will be merged into songMeta automatically.
-*/
+/* === INSERT: song metadata map (edit/add songs & artists here) === */
 const songMeta = {
     "Alan Walker II": {
       title: "Alan Walker II",
@@ -109,47 +113,147 @@ const songMeta = {
 /* === END INSERT === */
 
 /* =========================
+   Global helpers & audio event handlers
+   ========================= */
+
+/**
+ * setPlayIcon(isPlaying)
+ * - Updates the play/pause image element.
+ * - Preferred: <img id="playPauseBtn"> in your footer HTML.
+ * - If not present, the function will try a fallback selector.
+ */
+function setPlayIcon(isPlaying) {
+    let btn = document.getElementById('playPauseBtn');
+    if (!btn) {
+        // fallback: try original selectors (first matching play/pause image inside .songcontrols)
+        btn = document.querySelector('.songcontrols img[src*="play.svg"], .songcontrols img[src*="pause.svg"], .songcontrols img');
+    }
+    if (!btn) return;
+    try {
+        btn.src = isPlaying ? 'Recources/pause.svg' : 'Recources/play.svg';
+    } catch (e) {
+        // ignore
+    }
+}
+
+/* Loader show/hide (safe null-checks) */
+function showLoader() {
+    const loader = document.getElementById('loadingSpinner');
+    if (!loader) return;
+    loader.style.display = 'block';
+}
+function hideLoader() {
+    const loader = document.getElementById('loadingSpinner');
+    if (!loader) return;
+    loader.style.display = 'none';
+}
+
+/* Audio-level handlers to keep UI in sync regardless of where play() was called */
+audioPlayer.addEventListener('waiting', () => {
+    // buffer/slow network
+    showLoader();
+});
+audioPlayer.addEventListener('stalled', () => {
+    showLoader();
+});
+audioPlayer.addEventListener('playing', () => {
+    hideLoader();
+    setPlayIcon(true);
+});
+audioPlayer.addEventListener('pause', () => {
+    setPlayIcon(false);
+});
+audioPlayer.addEventListener('ended', () => {
+    setPlayIcon(false);
+});
+audioPlayer.addEventListener('error', (e) => {
+    console.warn('Audio error event', e);
+    hideLoader();
+    setPlayIcon(false);
+});
+
+/* =========================
    Playback & UI functions
    ========================= */
 
+/**
+ * playSongAtIndex(index)
+ * - Attempts immediate playback (best-effort). If rejected or buffering,
+ *   waits for canplay / canplaythrough or fallback timeout to start.
+ * - Shows a loader while waiting.
+ */
 function playSongAtIndex(index) {
     if (!playlist || playlist.length === 0) return;
     if (index < 0 || index >= playlist.length) return;
 
     currentSongIndex = index;
     const filename = playlist[index];
-    const loader = document.getElementById("loadingSpinner");
 
     // ---------------- SHOW LOADER ----------------
-    loader.style.display = "block";
+    showLoader();
 
     // Reset player state
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
+
+    // Set source and prefer metadata preloading (don't force full download)
+    audioPlayer.preload = "metadata";
     audioPlayer.src = `Songs/${filename}`;
-    audioPlayer.preload = "auto";  // preload fully
+    try { audioPlayer.load(); } catch (e) { /* ignore */ }
 
-    // Try to play when ready
-    const startPlayback = () => {
-        audioPlayer.play()
-            .then(() => {
-                loader.style.display = "none"; // ---------------- HIDE LOADER ----------------
-            })
-            .catch(err => {
-                console.error("Playback error:", err);
-                loader.style.display = "none"; // Hide loader even if error
+    // We'll try to play immediately, and retry on canplay/canplaythrough if needed.
+    let didStart = false;
+
+    function startedPlayback() {
+        didStart = true;
+        cleanupHandlers();
+        hideLoader();
+        setPlayIcon(true);
+    }
+
+    function onCanPlay() {
+        if (!didStart) {
+            audioPlayer.play().then(startedPlayback).catch(err => {
+                // may be blocked by autoplay policy; will retry by other handlers
+                console.warn('play() rejected on canplay:', err);
             });
-    };
-
-    // Listen for when the audio is ready enough
-    audioPlayer.addEventListener("canplaythrough", startPlayback, { once: true });
-
-    // Fallback in case canplaythrough never fires (slow network, etc.)
-    setTimeout(() => {
-        if (loader.style.display === "block") {
-            startPlayback();
         }
-    }, 3000);
+    }
+
+    function onCanPlayThrough() {
+        if (!didStart) {
+            audioPlayer.play().then(startedPlayback).catch(err => {
+                console.warn('play() rejected on canplaythrough:', err);
+            });
+        }
+    }
+
+    // Fallback: after this timeout, attempt to play anyway
+    const FALLBACK_MS = 2500;
+    const fallbackTimeout = setTimeout(() => {
+        if (!didStart) {
+            audioPlayer.play().then(startedPlayback).catch(err => {
+                console.warn('play() rejected by fallback timeout:', err);
+                // avoid infinite spinner: hide after short delay if still not started
+                setTimeout(() => { if (!didStart) hideLoader(); }, 1500);
+            });
+        }
+    }, FALLBACK_MS);
+
+    function cleanupHandlers() {
+        audioPlayer.removeEventListener('canplay', onCanPlay);
+        audioPlayer.removeEventListener('canplaythrough', onCanPlayThrough);
+        clearTimeout(fallbackTimeout);
+    }
+
+    audioPlayer.addEventListener('canplay', onCanPlay);
+    audioPlayer.addEventListener('canplaythrough', onCanPlayThrough);
+
+    // Immediate attempt (may be rejected due to autoplay policy)
+    audioPlayer.play().then(startedPlayback).catch(err => {
+        // Not fatal; will rely on canplay/canplaythrough/fallback
+        console.warn('Immediate play() call rejected (will retry via handlers):', err);
+    });
 
     // ---------------- METADATA + UI ----------------
     const decoded = decodeURIComponent(filename);
@@ -165,14 +269,14 @@ function playSongAtIndex(index) {
     const imagePath = meta.image || `Songs/Song Images/${encodeURIComponent(baseName)}.jpeg`;
     meta.image = imagePath;
 
+    // Update Now Playing & footer immediately so user sees info while buffering
     updateNowPlaying(meta);
 
-    // Highlight active song in playlist
+    // Highlight active song
     document.querySelectorAll('.song').forEach((el, i) => {
         el.classList.toggle('playing', i === index);
     });
 }
-
 
 /* updateNowPlaying - updates right panel and footer */
 function updateNowPlaying(song) {
@@ -311,7 +415,7 @@ function buildSongCards(containerEl) {
     });
 }
 
-/* === Popular Artists builder (unchanged) === */
+/* === Popular Artists builder === */
 function buildPopularArtists() {
     const artistList = [
         "Alan Walker",
@@ -541,7 +645,9 @@ function updateSongInfo(songName, artistName, imagePath) {
 
 /* Setup footer controls (seekbar/volume/play controls) */
 function setupFooterControls() {
-    const playPauseBtn = document.querySelector('.songcontrols img[src*="pause.svg"], .songcontrols img[src*="play.svg"]');
+    // Prefer id-based play/pause button, fallback to old selector
+    const playPauseBtn = document.getElementById('playPauseBtn') ||
+                         document.querySelector('.songcontrols img[src*="play.svg"], .songcontrols img[src*="pause.svg"], .songcontrols img');
     const nextBtn = document.querySelector('.songcontrols img[src*="forward.svg"]');
     const prevBtn = document.querySelector('.songcontrols img[src*="rewind.svg"]');
     const shuffleBtn = document.querySelector('.songcontrols img[src*="shuffle.svg"]');
@@ -580,13 +686,7 @@ function setupFooterControls() {
         return `${m}:${s.toString().padStart(2, '0')}`;
     }
 
-    function setPlayIcon(isPlaying) {
-        if (!playPauseBtn) return;
-        const playPath = 'Recources/play.svg';
-        const pausePath = 'Recources/pause.svg';
-        playPauseBtn.src = isPlaying ? pausePath : playPath;
-    }
-
+    // Play/Pause toggle wiring
     if (playPauseBtn) {
         playPauseBtn.addEventListener('click', () => {
             if (!audioPlayer.src) {
@@ -642,6 +742,7 @@ function setupFooterControls() {
         });
     }
 
+    // Update seekbar as audio plays
     audioPlayer.addEventListener('timeupdate', () => {
         const d = audioPlayer.duration || 0;
         const c = audioPlayer.currentTime || 0;
@@ -658,9 +759,7 @@ function setupFooterControls() {
         seekTime.textContent = `0:00 / ${formatTime(d)}`;
     });
 
-    audioPlayer.addEventListener('play', () => setPlayIcon(true));
-    audioPlayer.addEventListener('pause', () => setPlayIcon(false));
-
+    // Clicking on seekbar moves playback position
     seekbar.addEventListener('click', (e) => {
         const rect = seekbar.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -669,6 +768,7 @@ function setupFooterControls() {
         audioPlayer.currentTime = pct * audioPlayer.duration;
     });
 
+    // Make the circle draggable to seek
     let dragging = false;
     seekCircle.addEventListener('pointerdown', (e) => {
         dragging = true;
@@ -740,6 +840,7 @@ function setupFooterControls() {
         });
     })();
 
+    // initialize play icon according to audio state
     setPlayIcon(!audioPlayer.paused);
 }
 
@@ -810,9 +911,6 @@ async function main() {
             if (entry.image) songMeta[baseName].image = entry.image;
         });
     } else {
-        // If you ever re-enable directory listing uncomment getsongs() at top and use:
-        // const songsFromDir = await getsongs();
-        // playlist = songsFromDir.slice();
         console.warn('songsData is empty - playlist remains empty unless you enable directory reading or populate songsData.');
     }
 
